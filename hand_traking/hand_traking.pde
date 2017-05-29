@@ -1,16 +1,12 @@
-// Daniel Shiffman
-// http://codingtra.in
-// http://patreon.com/codingtrain
-// Code for: https://youtu.be/r0lvsMPGEoY
 
 // Daniel Shiffman
-// Depth thresholding example
+// blobtracking example
+// encontrado en 
+// https://github.com/CodingTrain/Rainbow-Code/blob/master/Tutorials/Processing/11_video/sketch_11_9_BlobTrackingIDs/sketch_11_9_BlobTrackingIDs.pde
+// y depth tresholding example
+// encontrado en
+// https://github.com/shiffman/OpenKinect-for-Processing/blob/master/OpenKinect-Processing/examples/Kinect_v1/DepthThreshold/DepthThreshold.pde
 
-// https://github.com/shiffman/OpenKinect-for-Processing
-// http://shiffman.net/p5/kinect/
-
-// Original example by Elie Zananiri
-// http://www.silentlycrashing.net
 
 import org.openkinect.freenect.*;
 import org.openkinect.processing.*;
@@ -22,7 +18,7 @@ PImage depthImg;
 
 // Which pixels do we care about?
 int minDepth =  0;
-int maxDepth = 560;
+int maxDepth = 600;
 
 // What is the kinect's angle
 float angle;
@@ -31,14 +27,17 @@ int blobCounter = 0;
 int maxLife = 200;
 
 color trackColor; 
-float threshold = 40;
-float distThreshold = 40;
+float threshold = 5;
+float distThreshold = 50;
+
+float midX = 320;
+float midY = 240;
 
 ArrayList<Blob> blobs = new ArrayList<Blob>();
 
 
 void setup() {
-  size(640, 480);
+  size(1280, 480, P3D);
 
   kinect = new Kinect(this);
   kinect.enableMirror(true);
@@ -54,7 +53,7 @@ void setup() {
 void draw() {
   // Draw the raw image
   //image(kinect.getDepthImage(), 0, 0);
-
+  background(0);
   // Threshold the depth image
   int[] rawDepth = kinect.getRawDepth();
   for (int i=0; i < rawDepth.length; i++) {
@@ -96,7 +95,7 @@ void draw() {
         boolean found = false;
         for (Blob b : currentBlobs) {
           if (b.isNear(x, y)) {
-            b.add(x, y);
+            b.add(x, y, rawDepth[loc]); //<>//
             found = true;
             break;
           }
@@ -111,7 +110,7 @@ void draw() {
   }
 
   for (int i = currentBlobs.size()-1; i >= 0; i--) {
-    if (currentBlobs.get(i).size() < 500) {
+    if (currentBlobs.get(i).size() < 5000) {
       currentBlobs.remove(i);
     }
   }
@@ -182,21 +181,35 @@ void draw() {
       }
     }
   }
-
+  int c = 0;
+  if (!blobs.isEmpty()){
+    midX = 0;
+    midY = 0;
+  }
   for (Blob b : blobs) {
     b.show();
+    midX += b.getCenter().x;
+    midY += b.getCenter().y;
+    c++;
   } 
-
-
+  if (!blobs.isEmpty()){
+    midX = midX/c;
+    midY = midY/c;
+  }
+  pushMatrix();
+  translate(640,0);
+  translate(midX,midY);
+  fill(255,255,0);
+  box(70);
+  popMatrix();
 
   textAlign(RIGHT);
-  fill(0);
-  //text(currentBlobs.size(), width-10, 40);
+  fill(255);
+  text(currentBlobs.size(), width-10, 40);
   //text(blobs.size(), width-10, 80);
   textSize(24);
-  text("color threshold: " + threshold, width-10, 50);  
-  text("distance threshold: " + distThreshold, width-10, 25);
-  
+  //text("color threshold: " + threshold, width-10, 50);  
+  //text("distance threshold: " + distThreshold, width-10, 25);
 }
 
 // Adjust the angle and the depth threshold min and max

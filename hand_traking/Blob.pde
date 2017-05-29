@@ -1,14 +1,14 @@
+// Adaptado de 
 // Daniel Shiffman
-// http://codingtra.in
-// http://patreon.com/codingtrain
-// Code for: https://youtu.be/r0lvsMPGEoY
+// https://github.com/CodingTrain/Rainbow-Code/blob/master/Tutorials/Processing/11_video/sketch_11_9_BlobTrackingIDs/sketch_11_9_BlobTrackingIDs.pde
 
 class Blob {
   float minx;
   float miny;
   float maxx;
   float maxy;
-      
+  float depth;
+  long count;
   int id = 0;
   
   boolean taken = false;
@@ -18,6 +18,8 @@ class Blob {
     miny = y;
     maxx = x;
     maxy = y;
+    depth = 0;
+    count = 0;
   }
     
   void show() {
@@ -28,17 +30,22 @@ class Blob {
     rect(minx, miny, maxx, maxy);
     
     textAlign(CENTER);
-    textSize(64);
+    textSize(30);
     fill(0);
-    text(id, minx + (maxx-minx)*0.5, maxy - 10);
+    text(this.size(), minx + (maxx-minx)*0.5, maxy - 10);
   }
 
-
-  void add(float x, float y) {
+  void add(float x, float y, float depth) {
     minx = min(minx, x);
     miny = min(miny, y);
     maxx = max(maxx, x);
     maxy = max(maxy, y);
+    this.depth = this.depth + depth;
+    count++;
+  }
+  
+  float getDepth(){
+    return depth/count;
   }
   
   void become(Blob other) {
@@ -46,6 +53,8 @@ class Blob {
     maxx = other.maxx;
     miny = other.miny;
     maxy = other.maxy;
+    depth = other.depth;
+    count = other.count;
   }
 
   float size() {
