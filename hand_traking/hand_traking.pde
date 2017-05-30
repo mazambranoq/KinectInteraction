@@ -1,4 +1,4 @@
- //<>// //<>// //<>//
+//<>// //<>// //<>//
 // Daniel Shiffman
 // blobtracking example
 // encontrado en 
@@ -17,8 +17,9 @@ Kinect kinect;
 PImage depthImg;
 
 // Which pixels do we care about?
-int minDepth =  0;
-int maxDepth = 600;
+int minDepth = 400;
+int maxDepth = 700;
+int depthProm = (minDepth+minDepth)/2;
 
 // What is the kinect's angle
 float angle;
@@ -187,17 +188,29 @@ void draw() {
     b.show();
   }
 
+  depthProm = (minDepth+minDepth)/2;
+
   sizeBlob=currentBlobs.size();
-textAlign(RIGHT);
+  textAlign(RIGHT);
   textSize(20);
   fill(255);
   if (sizeBlob>0) {
+     if (depthProm<currentBlobs.get(0).getDepth() && depthProm<currentBlobs.get(1).getDepth()) {
+        fill(255, 0, 0);
+      } else if (depthProm<currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
+        fill(0, 255, 0);
+      }else if (depthProm>currentBlobs.get(0).getDepth() && depthProm<currentBlobs.get(1).getDepth()) {
+        fill(0, 0, 255);
+      }else if (depthProm>currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
+        fill(0, 255, 255);
+      }else{
+        fill(255, 255, 0);
+      }
+      
     for (int i=0; i<sizeBlob; i++) {
-
       pushMatrix();
       translate(640, 0);
-      translate(currentBlobs.get(i).getCenter().array()[0], currentBlobs.get(i).getCenter().array()[1]);
-      fill(255, 255, 0);
+      translate(currentBlobs.get(i).getCenter().x, currentBlobs.get(i).getCenter().y);
       box(70);
       popMatrix();
       text(currentBlobs.get(i).getCenter().array()[0], width-10, 40*(i+1));  
@@ -208,9 +221,9 @@ textAlign(RIGHT);
 
 
 
-  
+
   //text(currentBlobs.size(), width-10, 40);
-  
+
   //text(blobs.size(), width-10, 80);
 
   //text("color threshold: " + threshold, width-10, 50);  
