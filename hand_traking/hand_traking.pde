@@ -24,16 +24,19 @@ int maxDepth = 600;
 float angle;
 int blobCounter = 0;
 
-int maxLife = 200;
-
 color trackColor; 
 float threshold = 5;
 float distThreshold = 50;
 
 float midX = 320;
 float midY = 240;
-
+float midD = 0;
+float angleY = 0;
+float angleZ = 0;
 ArrayList<Blob> blobs = new ArrayList<Blob>();
+float maxangleY = -10000000;
+float minangleY = 10000000;
+int counter = 0;
 
 
 void setup() {
@@ -43,7 +46,7 @@ void setup() {
   kinect.enableMirror(true);
   kinect.initDepth();
   angle = kinect.getTilt();
-  
+  frameRate(20);
 
   // Blank image
   depthImg = new PImage(kinect.width, kinect.height);
@@ -185,24 +188,57 @@ void draw() {
   if (!blobs.isEmpty()){
     midX = 0;
     midY = 0;
+    midD = -50;
   }
   for (Blob b : blobs) {
     b.show();
     midX += b.getCenter().x;
     midY += b.getCenter().y;
+    midD -= b.getDepth();
     c++;
   } 
   if (!blobs.isEmpty()){
     midX = midX/c;
     midY = midY/c;
+    midD = midD/c+1;
+    midD = map(midD, -450, -600, -100, -1000);
+  }
+  if (blobs.size() == 2){
+    
+    float D1 = blobs.get(0).getDepth();
+    float D2 = blobs.get(1).getDepth();
+    float x1 = blobs.get(0).getCenter().x;
+    float x2 = blobs.get(1).getCenter().x;
+    float y1 = blobs.get(0).getCenter().y;
+    float y2 = blobs.get(1).getCenter().y;
+    midY = ((y1 + y2)/2);
+    midD = ((D1 + D2)/2);
+    midX = ((x1 + x2)/2);
+    angleZ = asin((y2-midY)/sqrt(distSq(midX,midY,x2,y2)));
+    angleZ = map(angleZ, -1.5678263, 1.5263819, -3.14, 3.14);
+    angleY = asin((midD-D2)/distSq(midX,midD,x2,D2));
+    angleY = map(angleY, -0.0048440713, 0.020782402, -3.1, 3.5);
+    midD = -125;
+  }else{
+    angleY = 0;
+    angleZ = 0;
   }
   pushMatrix();
   translate(640,0);
-  translate(midX,midY);
-  fill(255,255,0);
-  box(70);
+  translate(midX,midY,midD);
+  //println(angleY);
+  //println(angleZ);
+  rotateY(angleY);
+  rotateZ(angleZ);
+  if (angleY != 0)maxangleY = max(angleY,maxangleY);
+  if (angleY != 0)minangleY = min(angleY,minangleY);
+  //fill(255,255,0);
+  noFill();
+  stroke(150);
+  box(150);
   popMatrix();
-
+  //println(maxangleY);
+  //println(minangleY);
   textAlign(RIGHT);
   fill(255);
   text(currentBlobs.size(), width-10, 40);
@@ -243,11 +279,4 @@ float distSq(float x1, float y1, float x2, float y2) {
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
   float d = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) +(z2-z1)*(z2-z1);
   return d;
-}
-
-void mousePressed() {
-  // Save color where the mouse is clicked in trackColor variable
-  int loc = mouseX + mouseY*depthImg.width;
-  trackColor = depthImg.pixels[loc];
-  println(red(trackColor), green(trackColor), blue(trackColor));
 }

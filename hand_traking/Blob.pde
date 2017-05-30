@@ -32,7 +32,7 @@ class Blob {
     textAlign(CENTER);
     textSize(30);
     fill(0);
-    text(this.size(), minx + (maxx-minx)*0.5, maxy - 10);
+    //text(this.size(), minx + (maxx-minx)*0.5, maxy - 10);
   }
 
   void add(float x, float y, float depth) {
