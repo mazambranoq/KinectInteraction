@@ -19,7 +19,7 @@ PImage depthImg;
 // Which pixels do we care about?
 int minDepth = 400;
 int maxDepth = 700;
-int depthProm = (minDepth+minDepth)/2;
+float depthProm = (minDepth+maxDepth)/2;
 
 // What is the kinect's angle
 float angle;
@@ -188,25 +188,26 @@ void draw() {
     b.show();
   }
 
-  depthProm = (minDepth+minDepth)/2;
+  depthProm = (minDepth+maxDepth)/2;
 
   sizeBlob=currentBlobs.size();
   textAlign(RIGHT);
   textSize(20);
   fill(255);
   if (sizeBlob>0) {
-     if (depthProm<currentBlobs.get(0).getDepth() && depthProm<currentBlobs.get(1).getDepth()) {
-        fill(255, 0, 0);
-      } else if (depthProm<currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
-        fill(0, 255, 0);
-      }else if (depthProm>currentBlobs.get(0).getDepth() && depthProm<currentBlobs.get(1).getDepth()) {
-        fill(0, 0, 255);
-      }else if (depthProm>currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
-        fill(0, 255, 255);
-      }else{
-        fill(255, 255, 0);
-      }
-      
+
+    if (sizeBlob>1&&depthProm <= currentBlobs.get(0).getDepth() && depthProm <= currentBlobs.get(1).getDepth()) {
+      fill(255, 0, 0);
+    } else if (sizeBlob>1&&depthProm<currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
+      fill(0, 255, 0);
+    } else if (sizeBlob>1&&depthProm>currentBlobs.get(0).getDepth() && depthProm<currentBlobs.get(1).getDepth()) {
+      fill(0, 0, 255);
+    } else if (sizeBlob>1&&depthProm>currentBlobs.get(0).getDepth() && depthProm>currentBlobs.get(1).getDepth()) {
+      fill(0, 255, 255);
+    } else {
+      fill(255, 255, 0);
+    }
+
     for (int i=0; i<sizeBlob; i++) {
       pushMatrix();
       translate(640, 0);
